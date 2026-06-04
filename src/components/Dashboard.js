@@ -13,9 +13,11 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // 直接從瀏覽器呼叫 API（客戶端）
   async function fetchData() {
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://background-knights-literature-expected.trycloudflare.com';
+      // 使用 Cloudflare Tunnel URL
+      const API_BASE = 'https://background-knights-literature-expected.trycloudflare.com';
       const res = await fetch(`${API_BASE}/api/trading-data`);
       if (!res.ok) throw new Error('API 失敗');
       const data = await res.json();
@@ -35,7 +37,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 60000);
+    // 每 30 秒更新一次
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -49,8 +52,14 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-400">無法連接 API: {error}</div>
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="text-red-400 mb-4">無法連接 API: {error}</div>
+        <button 
+          onClick={fetchData}
+          className="px-4 py-2 bg-blue-600 text-white rounded"
+        >
+          重試
+        </button>
       </div>
     );
   }

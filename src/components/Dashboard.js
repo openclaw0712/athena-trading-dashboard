@@ -4,7 +4,7 @@ import EquityChart from './EquityChart';
 import RiskMetrics from './RiskMetrics';
 import DailyReport from './DailyReport';
 
-const API_BASE = 'https://human-somehow-bandwidth-michelle.trycloudflare.com';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://trading-api.myclawdomain.ccwu.cc';
 
 export default function Dashboard() {
   const [positions, setPositions] = useState([]);

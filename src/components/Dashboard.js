@@ -4,7 +4,11 @@ import EquityChart from './EquityChart';
 import RiskMetrics from './RiskMetrics';
 import DailyReport from './DailyReport';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://trading-api.myclawdomain.ccwu.cc';
+// In production (Vercel), use the local API proxy
+// In development, use the Cloudflare Tunnel directly
+const API_BASE = process.env.NODE_ENV === 'production'
+  ? ''  // Vercel: use serverless API proxy (relative URL)
+  : process.env.NEXT_PUBLIC_API_URL || 'https://trading-api.myclawdomain.ccwu.cc';
 
 export default function Dashboard() {
   const [positions, setPositions] = useState([]);

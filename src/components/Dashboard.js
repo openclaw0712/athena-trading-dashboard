@@ -4,8 +4,7 @@ import EquityChart from './EquityChart';
 import RiskMetrics from './RiskMetrics';
 import DailyReport from './DailyReport';
 
-// 使用 Cloudflare Tunnel URL（從瀏覽器直接呼叫）
-const API_BASE = 'https://background-knights-literature-expected.trycloudflare.com';
+const API_BASE = 'https://human-somehow-bandwidth-michelle.trycloudflare.com';
 
 export default function Dashboard() {
   const [positions, setPositions] = useState([]);
@@ -110,7 +109,9 @@ export default function Dashboard() {
                   <tr key={i} className="border-t border-slate-700">
                     <td className="px-4 py-3">{new Date(e.timestamp).toLocaleString('zh-TW')}</td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded text-xs ${e.event === 'REJECTED' ? 'bg-red-900 text-red-400' : 'bg-green-900 text-green-400'}`}>{e.event}</span>
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        e.event === 'REJECTED' ? 'bg-red-900 text-red-400' : 'bg-green-900 text-green-400'
+                      }`}>{e.event}</span>
                     </td>
                     <td className="px-4 py-3">{e.rule}</td>
                     <td className="px-4 py-3 text-slate-400">{e.reason}</td>

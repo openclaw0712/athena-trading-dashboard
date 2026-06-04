@@ -11,10 +11,13 @@ export default function Dashboard() {
   const [pnl, setPnl] = useState({ daily_pnl: 0 });
   const [lastUpdate, setLastUpdate] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   async function fetchData() {
     try {
-      const res = await fetch('/api/trading-data');
+      const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://background-knights-literature-expected.trycloudflare.com';
+      const res = await fetch(`${API_BASE}/api/trading-data`);
+      if (!res.ok) throw new Error('API 失敗');
       const data = await res.json();
       
       setPositions(data.positions || []);
@@ -22,9 +25,10 @@ export default function Dashboard() {
       setRiskEvents(data.riskEvents || []);
       setPnl(data.dailyPnl || { daily_pnl: 0 });
       setLastUpdate(new Date().toLocaleTimeString('zh-TW'));
-      setLoading(false);
+      setError(null);
     } catch (err) {
-      console.error('讀取數據失敗:', err);
+      setError(err.message);
+    } finally {
       setLoading(false);
     }
   }
@@ -39,6 +43,14 @@ export default function Dashboard() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-slate-400">載入中...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-400">無法連接 API: {error}</div>
       </div>
     );
   }
@@ -92,7 +104,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {riskEvents.map((e, i) => (
+                {riskEvents.slice(-10).map((e, i) => (
                   <tr key={i} className="border-t border-slate-700">
                     <td className="px-4 py-3">{new Date(e.timestamp).toLocaleString('zh-TW')}</td>
                     <td className="px-4 py-3">

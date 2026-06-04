@@ -4,6 +4,9 @@ import EquityChart from './EquityChart';
 import RiskMetrics from './RiskMetrics';
 import DailyReport from './DailyReport';
 
+// 使用 Cloudflare Tunnel URL（從瀏覽器直接呼叫）
+const API_BASE = 'https://background-knights-literature-expected.trycloudflare.com';
+
 export default function Dashboard() {
   const [positions, setPositions] = useState([]);
   const [decisions, setDecisions] = useState([]);
@@ -15,11 +18,9 @@ export default function Dashboard() {
 
   async function fetchData() {
     try {
-      // 使用 Vercel API route
-      const res = await fetch('/api/trading-data');
+      const res = await fetch(`${API_BASE}/api/trading-data`);
       if (!res.ok) throw new Error('API 失敗');
       const data = await res.json();
-      
       setPositions(data.positions || []);
       setDecisions(data.decisions || []);
       setRiskEvents(data.riskEvents || []);
@@ -51,12 +52,7 @@ export default function Dashboard() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <div className="text-red-400 mb-4">無法連接 API: {error}</div>
-        <button 
-          onClick={fetchData}
-          className="px-4 py-2 bg-blue-600 text-white rounded"
-        >
-          重試
-        </button>
+        <button onClick={fetchData} className="px-4 py-2 bg-blue-600 text-white rounded">重試</button>
       </div>
     );
   }
@@ -114,9 +110,7 @@ export default function Dashboard() {
                   <tr key={i} className="border-t border-slate-700">
                     <td className="px-4 py-3">{new Date(e.timestamp).toLocaleString('zh-TW')}</td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        e.event === 'REJECTED' ? 'bg-red-900 text-red-400' : 'bg-green-900 text-green-400'
-                      }`}>{e.event}</span>
+                      <span className={`px-2 py-1 rounded text-xs ${e.event === 'REJECTED' ? 'bg-red-900 text-red-400' : 'bg-green-900 text-green-400'}`}>{e.event}</span>
                     </td>
                     <td className="px-4 py-3">{e.rule}</td>
                     <td className="px-4 py-3 text-slate-400">{e.reason}</td>

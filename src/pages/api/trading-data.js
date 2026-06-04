@@ -1,49 +1,37 @@
-const HOME = '/Users/openclaw0712';
-const WORKSPACE = `${HOME}/.openclaw/workspace`;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://trading-api.myclawdomain.ccwu.cc';
 
-import fs from 'fs';
-import path from 'path';
+export default async function handler(req, res) {
+  // CORS headers - allow Vercel frontend to access this API
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-function readJson(filePath) {
-  try {
-    if (fs.existsSync(filePath)) {
-      return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    }
-  } catch (e) {
-    console.error(`讀取失敗 ${filePath}:`, e.message);
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
   }
-  return null;
-}
 
-function readJsonl(filePath, limit = 50) {
   try {
-    if (fs.existsSync(filePath)) {
-      const lines = fs.readFileSync(filePath, 'utf-8')
-        .split('\n')
-        .filter(Boolean)
-        .slice(-limit);
-      return lines.map(l => {
-        try { return JSON.parse(l); } catch { return null; }
-      }).filter(Boolean);
+    // Fetch data from the Cloudflare Tunnel backend
+    const response = await fetch(`${API_BASE}/api/trading-data`);
+    if (!response.ok) {
+      throw new Error(`API responded with status ${response.status}`);
     }
-  } catch (e) {
-    console.error(`讀取失敗 ${filePath}:`, e.message);
+    const data = await response.json();
+    res.status(200).json(data);
+  } catch (err) {
+    console.error('Failed to fetch from backend:', err.message);
+    // Return fallback data so the UI doesn't break
+    res.status(200).json({
+      positions: [],
+      balance: { nav: 300 },
+      dailyPnl: { daily_pnl: 0 },
+      decisions: [],
+      riskEvents: [],
+      executions: [],
+      updatedAt: new Date().toISOString(),
+      error: err.message
+    });
   }
-  return [];
-}
-
-export default function handler(req, res) {
-  const logDir = path.join(WORKSPACE, 'logs', 'trading');
-
-  const data = {
-    positions: readJson(path.join(logDir, 'positions.json')) || [],
-    balance: readJson(path.join(logDir, 'balance.json')) || { nav: 300 },
-    dailyPnl: readJson(path.join(logDir, 'daily-pnl.json')) || { daily_pnl: 0 },
-    decisions: readJsonl(path.join(logDir, 'decisions.jsonl'), 50),
-    riskEvents: readJsonl(path.join(logDir, 'risk-events.jsonl'), 20),
-    executions: readJsonl(path.join(logDir, 'executions.jsonl'), 30),
-    updatedAt: new Date().toISOString()
-  };
-
-  res.status(200).json(data);
 }

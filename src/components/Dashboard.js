@@ -13,12 +13,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 直接從瀏覽器呼叫 API（客戶端）
   async function fetchData() {
     try {
-      // 使用 Cloudflare Tunnel URL
-      const API_BASE = 'https://background-knights-literature-expected.trycloudflare.com';
-      const res = await fetch(`${API_BASE}/api/trading-data`);
+      // 使用 Vercel API route
+      const res = await fetch('/api/trading-data');
       if (!res.ok) throw new Error('API 失敗');
       const data = await res.json();
       
@@ -37,7 +35,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
-    // 每 30 秒更新一次
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
